@@ -2,11 +2,16 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
+const stripe = require('stripe')(
+  'pk_test_51JanJmHKOMeXXROM2h6EjycWXPgjGQ8T9GG4133lMs8VsiCrtK2dHHsUZGnm0R3vOS6Ue91lDJYhbggljlEf04Hf009GBHcqv4'
+)
 
 // require route files
 const exampleRoutes = require('./app/routes/example_routes')
 const userRoutes = require('./app/routes/user_routes')
 const ticketRoutes = require('./app/routes/ticket_routes')
+const productRoutes = require('./app/routes/product_routes')
+
 // require middleware
 const errorHandler = require('./lib/error_handler')
 const requestLogger = require('./lib/request_logger')
@@ -23,6 +28,10 @@ const auth = require('./lib/auth')
 const serverDevPort = 4741
 const clientDevPort = 7165
 
+const calculateOrderAmount = (items) => {
+  // Calculate the amount
+  return 1400
+}
 // establish database connection
 // use new version of URL parser
 // use createIndex instead of deprecated ensureIndex
@@ -59,6 +68,7 @@ app.use(requestLogger)
 app.use(exampleRoutes)
 app.use(userRoutes)
 app.use(ticketRoutes)
+app.use(productRoutes)
 
 // register error handling middleware
 // note that this comes after the route middlewares, because it needs to be
@@ -68,6 +78,25 @@ app.use(errorHandler)
 // run API on designated port (4741 in this case)
 app.listen(port, () => {
   console.log('listening on port ' + port)
+})
+
+// The secret API kay
+
+app.use(express.static('public'))
+app.use(express.json())
+
+// STRIPE stuff
+app.post('/create-payment-intent', async (req, res) => {
+  const { items } = req.body
+  // Create calculateOrderAmount for money type
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: calculateOrderAmount(items),
+    currency: 'usd'
+  })
+
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  })
 })
 
 // needed for testing
