@@ -24,7 +24,6 @@ router.get('/products', (req, res, next) => {
 
 // GET single products
 router.get('/products/:id', (req, res, next) => {
-  // req.params.id will be set based on the `:id` in the route
   Product.findById(req.params.id)
     .then(handle404)
     .then((product) => res.status(200).json({ product: product.toObject() }))
@@ -40,7 +39,7 @@ router.post('/products', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-// UPDATE order
+// UPDATE product
 router.patch('/products/:id', requireToken, removeBlanks, (req, res, next) => {
   Product.findById(req.params.id)
     .then(handle404)
@@ -49,7 +48,7 @@ router.patch('/products/:id', requireToken, removeBlanks, (req, res, next) => {
     .catch(next)
 })
 
-// DELETE order
+// DELETE product
 router.delete('/products/:id', requireToken, (req, res, next) => {
   Product.findById(req.params.id)
     .then(handle404)
