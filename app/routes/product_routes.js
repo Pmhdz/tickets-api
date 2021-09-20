@@ -38,13 +38,13 @@ router.post('/products/open', requireToken, (req, res, next) => {
       // if products = empty array , make a new product! and then send it, if products = not an empty array we send that one: edge case, multiple open products ?!?
       if (product === null) {
         // contents, owner, coupon, completed = a product
-        const newProduct = Product.create({
+        const newOrder = Product.create({
           contents: [],
           owner: req.user._id,
           coupon: '',
           completed: false
         })
-        return newProduct
+        return newOrder
       } else {
         return product
       }
