@@ -30,30 +30,33 @@ const router = express.Router()
 router.post('/sign-up', (req, res, next) => {
   // start a promise chain, so that any errors will pass to `handle`
   Promise.resolve(req.body.credentials)
-    // reject any requests where `credentials.password` is not present, or where
-    // the password is an empty string
-    .then(credentials => {
-      if (!credentials ||
-          !credentials.password ||
-          credentials.password !== credentials.password_confirmation) {
+  // reject any requests where `credentials.password` is not present, or where
+  // the password is an empty string
+    .then((credentials) => {
+      if (
+        !credentials ||
+      !credentials.password ||
+      credentials.password !== credentials.password_confirmation
+      ) {
         throw new BadParamsError()
       }
     })
-    // generate a hash from the provided password, returning a promise
+  // generate a hash from the provided password, returning a promise
     .then(() => bcrypt.hash(req.body.credentials.password, bcryptSaltRounds))
-    .then(hash => {
+    .then((hash) => {
       // return necessary params to create a user
       return {
         email: req.body.credentials.email,
         hashedPassword: hash
+        // isAdmin: req.body.credentials.isAdmin
       }
     })
-    // create user with provided email and hashed password
-    .then(user => User.create(user))
-    // send the new user object back with status 201, but `hashedPassword`
-    // won't be send because of the `transform` in the User model
-    .then(user => res.status(201).json({ user: user.toObject() }))
-    // pass any errors along to the error handler
+  // create user with provided email and hashed password
+    .then((user) => User.create(user))
+  // send the new user object back with status 201, but `hashedPassword`
+  // won't be send because of the `transform` in the User model
+    .then((user) => res.status(201).json({ user: user.toObject() }))
+  // pass any errors along to the error handler
     .catch(next)
 })
 
@@ -65,7 +68,7 @@ router.post('/sign-in', (req, res, next) => {
 
   // find a user based on the email that was passed
   User.findOne({ email: req.body.credentials.email })
-    .then(record => {
+    .then((record) => {
       // if we didn't find a user with that email, send 401
       if (!record) {
         throw new BadCredentialsError()
@@ -76,7 +79,7 @@ router.post('/sign-in', (req, res, next) => {
       // is exactly equal to the hashed password stored in the DB
       return bcrypt.compare(pw, user.hashedPassword)
     })
-    .then(correctPassword => {
+    .then((correctPassword) => {
       // if the passwords matched
       if (correctPassword) {
         // the token will be a 16 byte random hex string
@@ -90,7 +93,7 @@ router.post('/sign-in', (req, res, next) => {
         throw new BadCredentialsError()
       }
     })
-    .then(user => {
+    .then((user) => {
       // return status 201, the email, and the new token
       res.status(201).json({ user: user.toObject() })
     })
@@ -103,29 +106,31 @@ router.patch('/change-password', requireToken, (req, res, next) => {
   let user
   // `req.user` will be determined by decoding the token payload
   User.findById(req.user.id)
-    // save user outside the promise chain
-    .then(record => { user = record })
-    // check that the old password is correct
+  // save user outside the promise chain
+    .then((record) => {
+      user = record
+    })
+  // check that the old password is correct
     .then(() => bcrypt.compare(req.body.passwords.old, user.hashedPassword))
-    // `correctPassword` will be true if hashing the old password ends up the
-    // same as `user.hashedPassword`
-    .then(correctPassword => {
+  // `correctPassword` will be true if hashing the old password ends up the
+  // same as `user.hashedPassword`
+    .then((correctPassword) => {
       // throw an error if the new password is missing, an empty string,
       // or the old password was wrong
       if (!req.body.passwords.new || !correctPassword) {
         throw new BadParamsError()
       }
     })
-    // hash the new password
+  // hash the new password
     .then(() => bcrypt.hash(req.body.passwords.new, bcryptSaltRounds))
-    .then(hash => {
+    .then((hash) => {
       // set and save the new hashed password in the DB
       user.hashedPassword = hash
       return user.save()
     })
-    // respond with no content and status 200
+  // respond with no content and status 200
     .then(() => res.sendStatus(204))
-    // pass any errors along to the error handler
+  // pass any errors along to the error handler
     .catch(next)
 })
 
@@ -133,7 +138,8 @@ router.delete('/sign-out', requireToken, (req, res, next) => {
   // create a new random token for the user, invalidating the current one
   req.user.token = null
   // save the token and respond with 204
-  req.user.save()
+  req.user
+    .save()
     .then(() => res.sendStatus(204))
     .catch(next)
 })

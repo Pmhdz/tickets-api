@@ -1,67 +1,59 @@
 const express = require('express')
 const passport = require('passport')
 
-const Event = require('../models/event')
+const Ticket = require('../models/ticket')
 
 const customErrors = require('../../lib/custom_errors')
 
 const handle404 = customErrors.handle404
-const requireOwnership = customErrors.requireOwnership
+// const requireOwnership = customErrors.requireOwnership
 const removeBlanks = require('../../lib/remove_blank_fields')
+// const User = require('../models/user')
 const requireToken = passport.authenticate('bearer', { session: false })
 const router = express.Router()
 
-// GET All events
-router.get('/events', requireToken, (req, res, next) => {
-  Event.find()
-    .then((events) => {
-      return events.map((event) => event.toObject())
+// GET All tickets
+router.get('/tickets', (req, res, next) => {
+  Ticket.find()
+    .then((tickets) => {
+      return tickets.map((ticket) => ticket.toObject())
     })
-    .then((events) => res.status(200).json({ events: events }))
+    .then((tickets) => res.status(200).json({ tickets: tickets }))
     .catch(next)
 })
 
-// GET single event
-router.get('/events/:id', requireToken, (req, res, next) => {
+// GET single tickets
+router.get('/tickets/:id', (req, res, next) => {
   // req.params.id will be set based on the `:id` in the route
-  Event.findById(req.params.id)
+  Ticket.findById(req.params.id)
     .then(handle404)
-    .then((event) => res.status(200).json({ event: event.toObject() }))
+    .then((ticket) => res.status(200).json({ ticket: ticket.toObject() }))
     .catch(next)
 })
 
-// CREATE
-router.post('/events', requireToken, (req, res, next) => {
-  req.body.event.owner = req.user.id
-  Event.create(req.body.event)
-    .then((event) => {
-      res.status(201).json({ event: event.toObject() })
+// CREATE tickets
+router.post('/tickets', requireToken, (req, res, next) => {
+  Ticket.create(req.body.ticket)
+    .then((ticket) => {
+      res.status(201).json({ ticket: ticket.toObject() })
     })
     .catch(next)
 })
 
-// UPDATE event
-router.patch('/events/:id', requireToken, removeBlanks, (req, res, next) => {
-  delete req.body.event.owner
-  Event.findById(req.params.id)
+// UPDATE order
+router.patch('/tickets/:id', requireToken, removeBlanks, (req, res, next) => {
+  Ticket.findById(req.params.id)
     .then(handle404)
-    .then((event) => {
-      requireOwnership(req, event)
-
-      return event.updateOne(req.body.event)
-    })
+    .then((ticket) => ticket.updateOne(req.body.ticket))
     .then(() => res.sendStatus(204))
     .catch(next)
 })
 
-// DELETE event
-router.delete('/events/:id', requireToken, (req, res, next) => {
-  Event.findById(req.params.id)
+// DELETE order
+router.delete('/tickets/:id', requireToken, (req, res, next) => {
+  Ticket.findById(req.params.id)
     .then(handle404)
-    .then((event) => {
-      requireOwnership(req, event)
-      event.deleteOne()
-    })
+    .then((ticket) => ticket.deleteOne())
     .then(() => res.sendStatus(204))
     .catch(next)
 })

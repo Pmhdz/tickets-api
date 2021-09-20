@@ -1,32 +1,23 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-const ticketSchema = require('./ticket.js')
-const eventSchema = new Schema(
+
+const orderSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
+    contents: [
+      // {
+      //   type: mongoose.Schema.Types.ObjectId,
+      //   ref: 'Product',
+      // },
+    ],
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
     },
-    description: {
-      type: String,
-      required: true
-    },
-    image: {
-      type: String,
-      required: true
-    },
-    price: {
-      type: Number,
-      required: true
-    },
-    category: String,
-    inStock: {
+    coupon: String,
+    completed: {
       type: Boolean,
       required: true
     }
-  },
-  {
-    ticket: [ticketSchema]
   },
   {
     timestamps: true,
@@ -34,4 +25,4 @@ const eventSchema = new Schema(
   }
 )
 
-module.exports = mongoose.model('Event', eventSchema)
+module.exports = mongoose.model('Order', orderSchema)
