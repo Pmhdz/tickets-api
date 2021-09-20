@@ -3,14 +3,14 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const stripe = require('stripe')(
-  'pk_test_51JanJmHKOMeXXROM2h6EjycWXPgjGQ8T9GG4133lMs8VsiCrtK2dHHsUZGnm0R3vOS6Ue91lDJYhbggljlEf04Hf009GBHcqv4'
+  'sk_test_51JanJmHKOMeXXROMJEbWqzrOVAkAhFJEttcpnY35KpK1Ir9LbpOgT7XxJzOxMIs5tykPsX3ssNFler0p7ejKAtOc00mL27bzQn'
 )
 
 // require route files
 const exampleRoutes = require('./app/routes/example_routes')
 const userRoutes = require('./app/routes/user_routes')
 const ticketRoutes = require('./app/routes/ticket_routes')
-const productRoutes = require('./app/routes/product_routes')
+const eventRoutes = require('./app/routes/event_routes')
 
 // require middleware
 const errorHandler = require('./lib/error_handler')
@@ -68,7 +68,7 @@ app.use(requestLogger)
 app.use(exampleRoutes)
 app.use(userRoutes)
 app.use(ticketRoutes)
-app.use(productRoutes)
+app.use(eventRoutes)
 
 // register error handling middleware
 // note that this comes after the route middlewares, because it needs to be

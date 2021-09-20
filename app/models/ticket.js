@@ -1,3 +1,4 @@
+const { model } = require('mongoose')
 const mongoose = require('mongoose')
 
 const ticketSchema = new mongoose.Schema(
@@ -10,26 +11,13 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    image: {
+    place: {
       type: String,
       required: true
-    },
-    price: {
-      type: Number,
-      required: true
-    },
-    category: String,
-    inStock: {
-      type: Boolean,
-      required: true
-    },
-    // number of product in stock
-    stock: Number
+    }
   },
   {
-    timestamps: true,
-    minimize: false
+    timestamps: true
   }
 )
-
-module.exports = mongoose.model('Ticket', ticketSchema)
+model.exports = ticketSchema
