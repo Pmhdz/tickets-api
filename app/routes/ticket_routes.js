@@ -40,7 +40,7 @@ router.post('/tickets', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-// UPDATE order
+// UPDATE ticket
 router.patch('/tickets/:id', requireToken, removeBlanks, (req, res, next) => {
   Ticket.findById(req.params.id)
     .then(handle404)
@@ -49,7 +49,7 @@ router.patch('/tickets/:id', requireToken, removeBlanks, (req, res, next) => {
     .catch(next)
 })
 
-// DELETE order
+// DELETE ticket
 router.delete('/tickets/:id', requireToken, (req, res, next) => {
   Ticket.findById(req.params.id)
     .then(handle404)

@@ -1,59 +1,94 @@
 const express = require('express')
 const passport = require('passport')
 
-const Ticket = require('../models/ticket')
+const Event = require('../models/event')
 
 const customErrors = require('../../lib/custom_errors')
 
 const handle404 = customErrors.handle404
-// const requireOwnership = customErrors.requireOwnership
+const requireOwnership = customErrors.requireOwnership
 const removeBlanks = require('../../lib/remove_blank_fields')
-// const User = require('../models/user')
 const requireToken = passport.authenticate('bearer', { session: false })
 const router = express.Router()
 
-// GET All tickets
-router.get('/tickets', (req, res, next) => {
-  Ticket.find()
-    .then((tickets) => {
-      return tickets.map((ticket) => ticket.toObject())
+// GET All events
+router.get('/events', requireToken, (req, res, next) => {
+  Event.find({ owner: req.user._id })
+    .then((events) => {
+      return events.map((event) => event.toObject())
     })
-    .then((tickets) => res.status(200).json({ tickets: tickets }))
+    .then((events) => res.status(200).json({ events: events }))
     .catch(next)
 })
 
-// GET single tickets
-router.get('/tickets/:id', (req, res, next) => {
+// GET single event
+router.get('/events/:id', requireToken, (req, res, next) => {
   // req.params.id will be set based on the `:id` in the route
-  Ticket.findById(req.params.id)
+  Event.findById(req.params.id)
     .then(handle404)
-    .then((ticket) => res.status(200).json({ ticket: ticket.toObject() }))
+    .then((event) => requireOwnership(req, event))
+    .then((event) => res.status(200).json({ event: event.toObject() }))
     .catch(next)
 })
 
-// CREATE tickets
-router.post('/tickets', requireToken, (req, res, next) => {
-  Ticket.create(req.body.ticket)
-    .then((ticket) => {
-      res.status(201).json({ ticket: ticket.toObject() })
+// GET users openEvent on sign in OR create one
+router.post('/events/open', requireToken, (req, res, next) => {
+  Event.findOne({ owner: req.user._id, completed: false }) // get all events i own
+    .then((event) => {
+      // if events = empty array , make a new event! and then send it, if events = not an empty array we send that one: edge case, multiple open events ?!?
+      if (event === null) {
+        // contents, owner, coupon, and completed should be a newEvent
+        const newEvent = Event.create({
+          contents: [],
+          owner: req.user._id,
+          coupon: '',
+          completed: false
+        })
+        // return a newEvent
+        return newEvent
+      } else {
+        // return a event
+        return event
+      }
+    })
+    .then((event) => {
+      res.status(200).json({ event: event.toObject() })
     })
     .catch(next)
 })
 
-// UPDATE order
-router.patch('/tickets/:id', requireToken, removeBlanks, (req, res, next) => {
-  Ticket.findById(req.params.id)
+// CREATE
+router.post('/events', requireToken, (req, res, next) => {
+  req.body.event.owner = req.user.id
+  Event.create(req.body.event)
+    .then((event) => {
+      res.status(201).json({ event: event.toObject() })
+    })
+    .catch(next)
+})
+
+// UPDATE event
+router.patch('/events/:id', requireToken, removeBlanks, (req, res, next) => {
+  delete req.body.event.owner
+  Event.findById(req.params.id)
     .then(handle404)
-    .then((ticket) => ticket.updateOne(req.body.ticket))
+    .then((event) => {
+      requireOwnership(req, event)
+
+      return event.updateOne(req.body.event)
+    })
     .then(() => res.sendStatus(204))
     .catch(next)
 })
 
-// DELETE order
-router.delete('/tickets/:id', requireToken, (req, res, next) => {
-  Ticket.findById(req.params.id)
+// DELETE event
+router.delete('/events/:id', requireToken, (req, res, next) => {
+  Event.findById(req.params.id)
     .then(handle404)
-    .then((ticket) => ticket.deleteOne())
+    .then((event) => {
+      requireOwnership(req, event)
+      event.deleteOne()
+    })
     .then(() => res.sendStatus(204))
     .catch(next)
 })
