@@ -2,15 +2,17 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const stripe = require('stripe')(
-  'sk_test_51JanJmHKOMeXXROMJEbWqzrOVAkAhFJEttcpnY35KpK1Ir9LbpOgT7XxJzOxMIs5tykPsX3ssNFler0p7ejKAtOc00mL27bzQn'
-)
+
+// Stripe, Event,and Cart will be disable due to need to meet the requirements. Will be reactivated when the project is finish and everything is working should be.
+// const stripe = require('stripe')(
+//   'sk_test_51JanJmHKOMeXXROMJEbWqzrOVAkAhFJEttcpnY35KpK1Ir9LbpOgT7XxJzOxMIs5tykPsX3ssNFler0p7ejKAtOc00mL27bzQn'
+// )
 
 // require route files
-const exampleRoutes = require('./app/routes/example_routes')
+// const exampleRoutes = require('./app/routes/example_routes')
 const userRoutes = require('./app/routes/user_routes')
 const ticketRoutes = require('./app/routes/ticket_routes')
-const eventRoutes = require('./app/routes/event_routes')
+// const eventRoutes = require('./app/routes/event_routes')
 
 // require middleware
 const errorHandler = require('./lib/error_handler')
@@ -28,10 +30,11 @@ const auth = require('./lib/auth')
 const serverDevPort = 4741
 const clientDevPort = 7165
 
-const calculateOrderAmount = (items) => {
-  // Calculate the amount
-  return 1400
-}
+// const calculateOrderAmount = (items) => {
+//   // Calculate the amount
+//   return 1400
+// }
+
 // establish database connection
 // use new version of URL parser
 // use createIndex instead of deprecated ensureIndex
@@ -65,10 +68,10 @@ app.use(express.urlencoded({ extended: true }))
 app.use(requestLogger)
 
 // register route files
-app.use(exampleRoutes)
+// app.use(exampleRoutes)
 app.use(userRoutes)
 app.use(ticketRoutes)
-app.use(eventRoutes)
+// app.use(eventRoutes)
 
 // register error handling middleware
 // note that this comes after the route middlewares, because it needs to be
@@ -85,19 +88,19 @@ app.listen(port, () => {
 app.use(express.static('public'))
 app.use(express.json())
 
-// STRIPE stuff
-app.post('/create-payment-intent', async (req, res) => {
-  const { items } = req.body
-  // Create calculateOrderAmount for money type
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderAmount(items),
-    currency: 'usd'
-  })
+// // STRIPE stuff
+// app.post('/create-payment-intent', async (req, res) => {
+//   const { items } = req.body
+//   // Create calculateOrderAmount for money type
+//   const paymentIntent = await stripe.paymentIntents.create({
+//     amount: calculateOrderAmount(items),
+//     currency: 'usd'
+//   })
 
-  res.send({
-    clientSecret: paymentIntent.client_secret
-  })
-})
+//   res.send({
+//     clientSecret: paymentIntent.client_secret
+//   })
+// })
 
 // needed for testing
 module.exports = app

@@ -1,34 +1,33 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose')
+// const User = require('./user')
 
 const ticketSchema = new mongoose.Schema(
   {
-    name: {
+    ticketName: {
       type: String,
       required: true
     },
-    description: {
+    ticketDescription: {
       type: String,
       required: true
     },
-    image: {
+    location: {
       type: String,
       required: true
     },
-    price: {
-      type: Number,
+    // images: {
+    //   type: String,
+    //   required: true
+    // },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
-    },
-    category: String,
-    inStock: {
-      type: Boolean,
-      required: true
-    },
-    // number of product in stock
-    stock: Number
+    }
   },
   {
-    timestamps: true,
-    minimize: false
+    timestamps: true
   }
 )
 
